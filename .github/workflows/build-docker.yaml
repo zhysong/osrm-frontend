@@ -1,0 +1,50 @@
+name: Build Docker - osrm-frontend 
+
+on: 
+  push:
+    branches:
+    - '**'
+    tags:
+    - '**'
+
+env:
+  IMAGE_NAME: osrm-frontend
+  DOCKERFILE_PATH: docker/Dockerfile
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Set IMAGE_TAG env # env IMAGE_TAG=BranchName-CommitID-Timestamp
+      run: echo IMAGE_TAG=$(basename ${GITHUB_REF})-$(echo ${GITHUB_SHA} | cut -c 1-7)-$(date -u +"%Y%m%d") >> ${GITHUB_ENV}
+    - name: Append latest if main branches # env '${IMAGE_TAG},latest'
+      if: endsWith(github.ref, 'main')
+      run: echo IMAGE_TAG=${IMAGE_TAG},latest >> ${GITHUB_ENV}
+
+    - name: Environment Printer
+      uses: managedkaos/print-env@v1.0
+
+    - name: Build & Publish to Github Container Registry
+      uses: elgohr/Publish-Docker-Github-Action@master
+      with:
+        name: ${{ github.actor }}/${{ env.IMAGE_NAME }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GHCR_IO_OSRM_FRONTEND_TOKEN }}
+        registry: ghcr.io
+        snapshot: false
+        dockerfile: ${{ env.DOCKERFILE_PATH }}
+        tags: "${{ env.IMAGE_TAG }}"
+
+    - name: Build & Publish to DockerHub
+      uses: elgohr/Publish-Docker-Github-Action@master
+      with:
+        name: ${{ github.actor }}/${{ env.IMAGE_NAME }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+        snapshot: false
+        dockerfile: ${{ env.DOCKERFILE_PATH }}
+        tags: "${{ env.IMAGE_TAG }}"
