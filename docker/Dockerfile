@@ -17,7 +17,7 @@ ENV OSRM_LABEL='Car (fastest)'
 
 # Copy package.json
 RUN mkdir -p /src
-COPY ../package.json /src
+COPY package.json /src
 
 ENV NVM_DIR "/root/.nvm"
 ENV NODE_VERSION 15.12.0
