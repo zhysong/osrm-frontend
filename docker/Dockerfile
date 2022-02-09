@@ -39,6 +39,7 @@ RUN wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | 
   npm --version && \
   # Install app dependencies
   cd /src && \
+  npm cache clean --force && \
   npm install
 
 # Create app directory
